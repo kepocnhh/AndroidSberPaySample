@@ -1,0 +1,2 @@
+# AndroidSberPaySample
+Android SberPay sample.
