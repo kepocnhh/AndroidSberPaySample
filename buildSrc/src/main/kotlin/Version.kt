@@ -4,7 +4,7 @@ object Version {
     // const val kotlin = "1.6.21" // compose 1.1.1 require kotlin 1.6.10
 
     object Android {
-        const val toolsBuildGradle = "7.1.1"
+        const val toolsBuildGradle = "7.1.3"
         const val compileSdk = 31
         const val minSdk = 23
         const val targetSdk = compileSdk

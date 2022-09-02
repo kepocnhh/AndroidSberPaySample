@@ -43,7 +43,7 @@ android {
 androidComponents.onVariants { variant ->
     val output = variant.outputs.single()
     check(output is com.android.build.api.variant.impl.VariantOutputImpl)
-    output.outputFileName.set("SberPaySample-${variant.buildType!!}-${Version.Application.name}.apk")
+    output.outputFileName.set("SberPaySample-${Version.Application.name}-${variant.buildType!!}.apk")
     afterEvaluate {
         tasks.getByName<JavaCompile>("compile${variant.name.capitalize()}JavaWithJavac") {
             targetCompatibility = Version.jvmTarget
@@ -56,6 +56,6 @@ androidComponents.onVariants { variant ->
 
 dependencies {
     implementation("androidx.activity:activity-compose:1.4.0")
-    implementation("androidx.appcompat:appcompat:1.4.1")
+    implementation("androidx.appcompat:appcompat:1.4.2")
     implementation("androidx.compose.foundation:foundation:${Version.Android.compose}")
 }

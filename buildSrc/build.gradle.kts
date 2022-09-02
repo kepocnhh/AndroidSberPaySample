@@ -8,7 +8,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.android.tools.build:gradle:7.1.1")
+    implementation("com.android.tools.build:gradle:7.1.3")
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10") // https://stackoverflow.com/a/68772241/4398606
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.10") // Kotlin runtime JAR files in the classpath should have the same version
 }

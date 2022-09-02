@@ -5,7 +5,9 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 class MainActivity : AppCompatActivity() {
@@ -13,7 +15,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Box(modifier = Modifier.fillMaxSize()) {
-                BasicText(text = BuildConfig.VERSION_NAME)
+                BasicText(
+                    modifier = Modifier.align(Alignment.Center),
+                    text = BuildConfig.VERSION_NAME
+                )
             }
         }
     }
