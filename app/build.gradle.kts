@@ -1,6 +1,7 @@
 repositories {
     mavenCentral()
     google()
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
 }
 
 plugins {
@@ -59,4 +60,8 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.5.1")
     implementation("androidx.appcompat:appcompat:1.5.0")
     implementation("androidx.compose.foundation:foundation:${Version.Android.compose}")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.github.kepocnhh:KotlinExtension.OkHttp:0.1-SNAPSHOT")
+    implementation("com.github.kepocnhh:KotlinExtension.Functional:0.3-SNAPSHOT")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 }
