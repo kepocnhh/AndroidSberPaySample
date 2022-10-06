@@ -54,7 +54,8 @@ class MainActivity : AppCompatActivity() {
             val returnUrl = "foo" // todo
             val orderNumber = System.currentTimeMillis().toString() // todo
             val amount = 100 // todo
-            val deepLink = "bar" // todo
+//            val deepLink = "bar" // todo
+            val deepLink = "app://deeplink_test?foo1=1&foo2=2" // todo
             val jsonParams = "{\"app2app\":true,\"app.osType\":\"android\",\"app.deepLink\":\"$deepLink\"}"
             val result = singled(Dispatchers.IO) {
                 if (login.isEmpty()) error("Login is empty!")
