@@ -1,7 +1,10 @@
 package test.android.sberpay
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.view.ViewGroup
 import androidx.activity.compose.setContent
@@ -32,8 +35,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
-import sberpay.sdk.sberpaysdk.domain.SberbankOnlineManager
-import sberpay.sdk.sberpaysdk.view.SberButton
 import sp.kx.functional.computation.Single
 import sp.kx.functional.computation.util.coroutine.singled
 import sp.kx.okhttp.execute
@@ -44,7 +45,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val URL = "https://3dsec.sberbank.ru/payment/rest"
         private val scope = CoroutineScope(Dispatchers.Main)
-        private val manager = SberbankOnlineManager()
         private val client = OkHttpClient.Builder().build()
         private val preferences = requireNotNull(App.context).getSharedPreferences("sberpaysample", Context.MODE_PRIVATE) ?: TODO()
     }
@@ -159,6 +159,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun Context.isSberbankOnlineInstalled(): Boolean {
+        val info = try {
+            packageManager.getPackageInfo("ru.sberbankmobile", 0)
+        } catch (e: Throwable) {
+            return false
+        }
+        return info != null
+    }
+
+    private fun Context.openSberbankOnline(bankInvoiceId: String) {
+        val intent = Intent("android.intent.action.VIEW")
+        // dat=sberpay://invoicing/v2?operationType=app2App&bankInvoiceId=nvAQwxtZhEgCVwWVhBEGILR3LpvKwkCX
+        // cmp=ru.sberbankmobile/ru.sberbank.mobile.core.deeplink.impl.view.DeeplinkActivity
+        val scheme = "sberpay"
+        val authority = ""
+        val path = "invoicing/v2"
+        val operationType = "app2App"
+        intent.data = Uri.parse("sberpay://invoicing/v2?operationType=$operationType&bankInvoiceId=$bankInvoiceId")
+//        intent.data = Uri.Builder()
+//            .scheme(scheme)
+//            .authority(authority)
+//            .path(path)
+//            .appendQueryParameter("operationType", "app2App")
+//            .appendQueryParameter("bankInvoiceId", bankInvoiceId)
+//            .build()
+        intent.component = ComponentName("ru.sberbankmobile", "ru.sberbank.mobile.core.deeplink.impl.view.DeeplinkActivity")
+        println("intent: ${intent}")
+        startActivity(intent)
+    }
+
     @Composable
     private fun Pay(response: SberResponse) {
         val context: Context = LocalContext.current
@@ -169,8 +199,8 @@ class MainActivity : AppCompatActivity() {
                     .height(48.dp)
                     .align(Alignment.Center)
                     .clickable {
-                        if (manager.isSberbankOnlineInstalled(context)) {
-                            manager.openSberbankOnline(context, response.sbolBankInvoiceId)
+                        if (context.isSberbankOnlineInstalled()) {
+                            context.openSberbankOnline(response.sbolBankInvoiceId)
                         } else {
                             showToast("no sberpay")
                         }
@@ -200,22 +230,6 @@ class MainActivity : AppCompatActivity() {
                     Pay(response)
                 }
             }
-//            Box(modifier = Modifier.fillMaxSize()) {
-//                AndroidView(
-//                    modifier = Modifier.align(Alignment.Center),
-//                    factory = { context ->
-//                        SberButton(context).also {
-//                            it.setOnClickListener {
-//                                if (manager.isSberbankOnlineInstalled(context)) {
-//                                    // todo
-//                                } else {
-//                                    showToast("no sberpay")
-//                                }
-//                            }
-//                        }
-//                    }
-//                )
-//            }
         }
     }
 }
