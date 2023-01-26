@@ -68,6 +68,12 @@ private fun onSberWebRegister(login: String, password: String, onResult: (Single
                             if (errorCode.isNullOrEmpty()) {
                                 error("Unknown error!")
                             } else {
+                                println(
+                                    """
+                                        error: $errorCode
+                                        message: $errorMessage
+                                    """.trimIndent()
+                                )
                                 error("Error [$errorCode] $errorMessage!")
                             }
                         }
