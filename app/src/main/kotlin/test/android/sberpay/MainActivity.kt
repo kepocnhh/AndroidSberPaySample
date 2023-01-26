@@ -1,6 +1,5 @@
 package test.android.sberpay
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -11,171 +10,72 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import org.json.JSONObject
-import sp.kx.functional.computation.Single
-import sp.kx.functional.computation.util.coroutine.singled
-import sp.kx.okhttp.execute
-import sp.kx.okhttp.requireBody
 
 class MainActivity : AppCompatActivity() {
-    companion object {
-        private const val URL = "https://3dsec.sberbank.ru/payment/rest"
-        private val scope = CoroutineScope(Dispatchers.Main)
-        private val client = OkHttpClient.Builder().build()
-        private val preferences = requireNotNull(App.context).getSharedPreferences("sberpaysample", Context.MODE_PRIVATE) ?: TODO()
+    private enum class RouterState {
+        SBER_PAY,
+        WEB_VIEW
     }
 
-    private fun onRegister(login: String, password: String, onResult: (Single<SberResponse>) -> Unit) {
-        scope.launch {
-            val returnUrl = "foo" // todo
-            val orderNumber = System.currentTimeMillis().toString() // todo
-            val amount = 100 // todo
-//            val deepLink = "bar" // todo
-            val deepLink = "app://deeplink_test?foo1=1&foo2=2" // todo
-            val jsonParams = "{\"app2app\":true,\"app.osType\":\"android\",\"app.deepLink\":\"$deepLink\"}"
-            val result = singled(Dispatchers.IO) {
-                if (login.isEmpty()) error("Login is empty!")
-                if (password.isEmpty()) error("Password is empty!")
-                client.execute(
-                    url = "$URL/register.do",
-                    queries = mapOf(
-                        "userName" to login,
-                        "password" to password,
-                        "returnUrl" to returnUrl,
-                        "orderNumber" to orderNumber,
-                        "amount" to amount.toString(),
-                        "jsonParams" to jsonParams,
-                    ),
-                    headers = emptyMap()
-                ).use {
-                    when (it.code) {
-                        200 -> {
-                            val body = it.requireBody().string()
-                            val jsonObject = JSONObject(body)
-                            val orderId = jsonObject.optString("orderId")
-                            if (orderId.isNullOrEmpty()) {
-                                val errorCode = jsonObject.optString("errorCode")
-                                val errorMessage = jsonObject.optString("errorMessage")
-                                if (errorCode.isNullOrEmpty()) {
-                                    error("Unknown error!")
-                                } else {
-                                    error("Error [$errorCode] $errorMessage!")
+    @Composable
+    private fun Router() {
+        Box(modifier = Modifier.fillMaxSize()) {
+            val state = remember { mutableStateOf<RouterState?>(null) }
+            when (state.value) {
+                RouterState.SBER_PAY -> {
+                    SberPayScreen()
+                }
+                RouterState.WEB_VIEW -> {
+                    SberWebScreen()
+                }
+                null -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Center)
+                    ) {
+                        BasicText(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .clickable {
+                                    state.value = RouterState.SBER_PAY
                                 }
-                            }
-                            preferences.edit()
-                                .putString("userName", login)
-                                .putString("password", password)
-                                .apply()
-                            SberResponse(
-                                orderId = orderId,
-                                sbolBankInvoiceId = jsonObject.getJSONObject("externalParams").getString("sbolBankInvoiceId")
-                            )
-                        }
-                        else -> error("Code ${it.code}!")
+                                .wrapContentHeight(Alignment.CenterVertically),
+                            style = TextStyle(
+                                color = Color.Blue,
+                                textAlign = TextAlign.Center
+                            ),
+                            text = "Sber Pay"
+                        )
+                        BasicText(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .clickable {
+                                    state.value = RouterState.WEB_VIEW
+                                }
+                                .wrapContentHeight(Alignment.CenterVertically),
+                            style = TextStyle(
+                                color = Color.Blue,
+                                textAlign = TextAlign.Center
+                            ),
+                            text = "WebView"
+                        )
                     }
                 }
             }
-            onResult(result)
-        }
-    }
-
-    @Composable
-    private fun Enter(onResult: (SberResponse) -> Unit) {
-        val loginState = rememberSaveable { mutableStateOf(preferences.getString("userName", "") ?: "") }
-        val passwordState = rememberSaveable { mutableStateOf(preferences.getString("password", "") ?: "") }
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.align(Alignment.Center)) {
-                BasicText(
-                    modifier = Modifier.fillMaxWidth(),
-                    style = TextStyle(color = Color.Gray),
-                    text = "login"
-                )
-                BasicTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    textStyle = TextStyle(color = Color.White),
-                    singleLine = true,
-                    value = loginState.value,
-                    onValueChange = { loginState.value = it }
-                )
-                BasicText(
-                    modifier = Modifier.fillMaxWidth(),
-                    style = TextStyle(color = Color.Gray),
-                    text = "password"
-                )
-                BasicTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    textStyle = TextStyle(color = Color.White),
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    value = passwordState.value,
-                    onValueChange = { passwordState.value = it }
-                )
-                BasicText(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .clickable {
-                            onRegister(login = loginState.value, password = passwordState.value) {
-                                when (it) {
-                                    is Single.Success -> onResult(it.value)
-                                    is Single.Error -> showToast("error: ${it.error}")
-                                }
-                            }
-                        },
-                    style = TextStyle(
-                        color = Color.Blue,
-                        textAlign = TextAlign.Center
-                    ),
-                    text = "register"
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun Pay(response: SberResponse) {
-        val context: Context = LocalContext.current
-        Box(modifier = Modifier.fillMaxSize()) {
-            BasicText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .align(Alignment.Center)
-                    .clickable {
-                        if (context.isSberbankOnlineInstalled()) {
-                            context.openSberbankOnline(response.sbolBankInvoiceId)
-                        } else {
-                            showToast("no sberpay")
-                        }
-                    },
-                style = TextStyle(
-                    color = Color.Blue,
-                    textAlign = TextAlign.Center
-                ),
-                text = "pay"
-            )
         }
     }
 
@@ -187,13 +87,7 @@ class MainActivity : AppCompatActivity() {
                     .fillMaxSize()
                     .background(Color.Black)
             ) {
-                val responseState = remember { mutableStateOf<SberResponse?>(null) }
-                val response = responseState.value
-                if (response == null) {
-                    Enter { responseState.value = it }
-                } else {
-                    Pay(response)
-                }
+                Router()
             }
         }
     }
