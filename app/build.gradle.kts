@@ -10,13 +10,16 @@ plugins {
 }
 
 android {
+    val applicationId = "test.android.sberpay"
+    namespace = applicationId
     compileSdk = Version.Android.compileSdk
 
     defaultConfig {
+        this.applicationId = applicationId
         minSdk = Version.Android.minSdk
         targetSdk = Version.Android.targetSdk
-        versionCode = Version.Application.code
         versionName = Version.Application.name
+        versionCode = Version.Application.code
         manifestPlaceholders["appName"] = "@string/app_name"
     }
 
@@ -32,19 +35,15 @@ android {
         }
     }
 
-    buildFeatures {
-        compose = true
-    }
+    buildFeatures.compose = true
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = Version.Android.compose
-    }
+    composeOptions.kotlinCompilerExtensionVersion = Version.Android.compose
 }
 
 androidComponents.onVariants { variant ->
     val output = variant.outputs.single()
     check(output is com.android.build.api.variant.impl.VariantOutputImpl)
-    output.outputFileName.set("SberPaySample-${Version.Application.name}-${variant.buildType!!}.apk")
+    output.outputFileName.set("SberPaySample-${variant.name}-${Version.Application.name}-${Version.Application.code}.apk")
     afterEvaluate {
         tasks.getByName<JavaCompile>("compile${variant.name.capitalize()}JavaWithJavac") {
             targetCompatibility = Version.jvmTarget
@@ -56,8 +55,8 @@ androidComponents.onVariants { variant ->
 }
 
 dependencies {
-    implementation("androidx.activity:activity-compose:1.5.1")
-    implementation("androidx.appcompat:appcompat:1.5.0")
+    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation("androidx.appcompat:appcompat:1.6.0")
     implementation("androidx.compose.foundation:foundation:${Version.Android.compose}")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.github.kepocnhh:KotlinExtension.OkHttp:0.1-SNAPSHOT")
