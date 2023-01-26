@@ -1,17 +1,16 @@
 package test.android.sberpay
 
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Bundle
-import android.view.ViewGroup
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
@@ -26,20 +25,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.json.JSONObject
 import sp.kx.functional.computation.Single
 import sp.kx.functional.computation.util.coroutine.singled
 import sp.kx.okhttp.execute
 import sp.kx.okhttp.requireBody
-import test.android.kiosk.showToast
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -158,36 +152,6 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
-    }
-
-    private fun Context.isSberbankOnlineInstalled(): Boolean {
-        val info = try {
-            packageManager.getPackageInfo("ru.sberbankmobile", 0)
-        } catch (e: Throwable) {
-            return false
-        }
-        return info != null
-    }
-
-    private fun Context.openSberbankOnline(bankInvoiceId: String) {
-        val intent = Intent("android.intent.action.VIEW")
-        // dat=sberpay://invoicing/v2?operationType=app2App&bankInvoiceId=nvAQwxtZhEgCVwWVhBEGILR3LpvKwkCX
-        // cmp=ru.sberbankmobile/ru.sberbank.mobile.core.deeplink.impl.view.DeeplinkActivity
-        val scheme = "sberpay"
-        val authority = ""
-        val path = "invoicing/v2"
-        val operationType = "app2App"
-        intent.data = Uri.parse("sberpay://invoicing/v2?operationType=$operationType&bankInvoiceId=$bankInvoiceId")
-//        intent.data = Uri.Builder()
-//            .scheme(scheme)
-//            .authority(authority)
-//            .path(path)
-//            .appendQueryParameter("operationType", "app2App")
-//            .appendQueryParameter("bankInvoiceId", bankInvoiceId)
-//            .build()
-        intent.component = ComponentName("ru.sberbankmobile", "ru.sberbank.mobile.core.deeplink.impl.view.DeeplinkActivity")
-        println("intent: ${intent}")
-        startActivity(intent)
     }
 
     @Composable
