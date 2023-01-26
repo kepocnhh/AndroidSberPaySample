@@ -6,8 +6,6 @@ object Version {
         const val compileSdk = 33
         const val minSdk = 23
         const val targetSdk = compileSdk
-//        const val compose = "1.2.0"
-        // const val compose = "1.2.1" // 2022/09/02 compiler 1.2.0
         const val compose = "1.3.1"
     }
 
