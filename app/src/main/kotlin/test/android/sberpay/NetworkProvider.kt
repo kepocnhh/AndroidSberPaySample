@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate
 internal object NetworkProvider {
     const val URL = "https://3dsec.sberbank.ru/payment/rest"
     val client = OkHttpClient.Builder().also { builder ->
-        val factory = CertificateFactory.getInstance("X.509")
+//        val factory = CertificateFactory.getInstance("X.509")
 //        val context = App.context ?: TODO()
 //        val streams = setOf(context.assets.open("foo.pem"))
 //        val certificates = streams.map { stream ->

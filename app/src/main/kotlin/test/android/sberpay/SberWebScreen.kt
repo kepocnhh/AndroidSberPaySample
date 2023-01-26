@@ -1,5 +1,8 @@
 package test.android.sberpay
 
+import android.net.http.SslError
+import android.view.ViewGroup
+import android.webkit.SslErrorHandler
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.clickable
@@ -148,19 +151,46 @@ private fun SberWebEnter(onResult: (SberWebResponse) -> Unit) {
 
 @Composable
 private fun PaymentWebView(url: String) {
+    println("load url: $url")
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { context ->
             WebView(context).also { view ->
+                view.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
                 view.loadUrl(url)
                 view.webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(
-                        view: WebView,
-                        url: String
-                    ): Boolean {
-                        println("url: $url")
-                        // todo
-                        return false
+//                    override fun shouldOverrideUrlLoading(
+//                        view: WebView,
+//                        url: String
+//                    ): Boolean {
+//                        println("url: $url")
+//                        // todo
+//                        return false
+//                    }
+
+                    override fun onReceivedSslError(
+                        view: WebView?,
+                        handler: SslErrorHandler?,
+                        error: SslError?
+                    ) {
+                        if (handler == null) TODO()
+                        if (error == null) {
+                            context.showToast("ssl error null")
+                        } else {
+                            when (error.primaryError) {
+                                SslError.SSL_UNTRUSTED -> {
+                                    context.showToast("ssl error untrusted")
+//                                    val certificate = error.certificate
+                                }
+                                else -> {
+                                    context.showToast("ssl error unknown")
+                                }
+                            }
+                        }
+                        handler.cancel()
                     }
                 }
                 view.settings.javaScriptEnabled = true
